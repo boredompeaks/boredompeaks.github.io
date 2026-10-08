@@ -1,0 +1,3031 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0d18">
+<title>Uzair — Build Things. Understand Things.</title>
+<meta name="description" content="Portfolio of Uzair — builder, developer, and systems thinker.">
+<meta property="og:title" content="Uzair — Build Things. Understand Things.">
+<meta property="og:description" content="Portfolio of Uzair — builder, developer, and systems thinker.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- Google Fonts: Space Grotesk, DM Serif Display, IBM Plex Mono -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Importmap for native ES module loading on GitHub Pages & modern browsers -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://esm.sh/three@0.172.0",
+    "gsap": "https://esm.sh/gsap@3.12.7",
+    "gsap/ScrollTrigger": "https://esm.sh/gsap@3.12.7/ScrollTrigger",
+    "lenis": "https://esm.sh/lenis@1.1.20"
+  }
+}
+</script>
+
+<!-- Global Fallback Scripts (In case opened outside Vite or direct file load) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.20/dist/lenis.min.js"></script>
+
+<style>
+/* ================================================================
+   GLOBAL CONTROL DECK (CSS :root)
+   Dynamic theme tokens, organic atmospheric colors, clamp scales
+   ================================================================ */
+:root {
+  /* Dynamic Atmospheric Palette (No static black!) */
+  --bg-primary: #0b0d18;
+  --bg-secondary: #121526;
+  --bg-tertiary: #191c30;
+  --bg-glow-1: rgba(30, 48, 88, 0.45);
+  --bg-glow-2: rgba(24, 62, 54, 0.35);
+  --bg-glow-3: rgba(52, 28, 64, 0.3);
+
+  --surface: rgba(22, 26, 42, 0.72);
+  --surface-elevated: rgba(28, 34, 56, 0.85);
+  --surface-border: rgba(242, 240, 233, 0.1);
+  --surface-border-hover: rgba(216, 255, 69, 0.5);
+
+  --text-main: #f5f3ec;
+  --text-dim: #aaa79e;
+  --text-faint: #63615b;
+  --accent: #d8ff45;          /* Signature Volt Lime */
+  --accent-cyan: #3df3b8;
+  --accent-glow: rgba(216, 255, 69, 0.4);
+
+  --line: rgba(242, 240, 233, 0.08);
+  --line-strong: rgba(242, 240, 233, 0.2);
+
+  --display: "Space Grotesk", -apple-system, sans-serif;
+  --serif: "DM Serif Display", serif;
+  --mono: "IBM Plex Mono", monospace;
+
+  --pad: clamp(1.25rem, 3.8vw, 5rem);
+  --max: 1560px;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --hero-title: clamp(3.8rem, 14.5vw, 17.5rem);
+  --h2-title: clamp(2.8rem, 9vw, 11rem);
+  --lead-size: clamp(1.05rem, 1.4vw, 1.55rem);
+
+  --z-bg: 0;
+  --z-3d: 1;
+  --z-light: 2;
+  --z-grain: 3;
+  --z-mask: 4;
+  --z-content: 10;
+  --z-frame: 100;
+  --z-preview: 150;
+  --z-modal: 500;
+  --z-cursor: 9999;
+  --z-loader: 10000;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+html {
+  background: var(--bg-primary);
+  color: var(--text-main);
+  overflow-x: hidden;
+  font-size: 16px;
+  scroll-behavior: auto;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-main);
+  font-family: var(--display);
+  overflow-x: hidden;
+  cursor: none;
+  line-height: 1.5;
+  position: relative;
+  min-height: 100vh;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+body.loading {
+  overflow: hidden;
+}
+
+::selection {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+/* ================================================================
+   DYNAMIC MOVING BACKGROUND (NO STATIC BLACK)
+   Fluid moving canvas + interactive chromatic light fields + grain
+   ================================================================ */
+#fluidBgCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-bg);
+  pointer-events: none;
+}
+
+#stage3dCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--z-3d);
+  pointer-events: none;
+}
+
+.ambientLighting {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-light);
+  pointer-events: none;
+  background: radial-gradient(circle 850px at var(--mouse-x, 50%) var(--mouse-y, 40%), rgba(216, 255, 69, 0.08) 0%, rgba(61, 243, 184, 0.03) 40%, transparent 75%);
+  transition: background 0.1s ease-out;
+}
+
+.filmGrain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.stageGradientMask {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-mask);
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(11, 13, 24, 0.0) 0%, rgba(11, 13, 24, 0.25) 60%, rgba(11, 13, 24, 0.65) 100%);
+}
+
+/* ================================================================
+   3D PRELOADER & THEATRICAL CURTAIN-SPLIT REVEAL (2.0 SECONDS)
+   ================================================================ */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-loader);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+/* Dual Vertical Split Curtains */
+.curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  background: linear-gradient(165deg, #0e1120, #070912);
+  z-index: 2;
+  will-change: transform;
+}
+
+.curtainLeft {
+  left: 0;
+  border-right: 1px solid rgba(216, 255, 69, 0.2);
+}
+
+.curtainRight {
+  right: 0;
+  border-left: 1px solid rgba(216, 255, 69, 0.2);
+}
+
+.loaderStage {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+#loaderCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.loaderContent {
+  position: relative;
+  z-index: 4;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loaderNum {
+  font: 500 0.82rem var(--mono);
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  margin-bottom: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px var(--accent-glow);
+}
+
+.loaderWord {
+  font-size: clamp(4.5rem, 16vw, 14rem);
+  font-weight: 700;
+  letter-spacing: -0.09em;
+  line-height: 0.82;
+  color: var(--text-main);
+  overflow: hidden;
+}
+
+.loaderWord span {
+  display: inline-block;
+  transform: translateY(115%);
+}
+
+.loaderTrack {
+  width: min(280px, 65vw);
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-top: 2rem;
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+.loaderProgress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0%;
+  background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+
+/* ================================================================
+   FLUID INERTIA CURSOR WITH REAL PHYSICS
+   ================================================================ */
+.cursor {
+  position: fixed;
+  z-index: var(--z-cursor);
+  pointer-events: none;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  mix-blend-mode: difference;
+}
+
+.cursorRing {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  transition: width 0.3s var(--ease), height 0.3s var(--ease), border-color 0.3s ease, background 0.3s ease, transform 0.2s var(--ease);
+  will-change: transform, width, height;
+}
+
+.cursorWave {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.6);
+  transition: transform 0.35s var(--ease), opacity 0.35s ease;
+}
+
+.cursor.repelling .cursorWave {
+  opacity: 0.75;
+  transform: scale(2.8);
+}
+
+.cursor.clicking .cursorRing {
+  transform: scale(0.7);
+  background: rgba(216, 255, 69, 0.35);
+}
+
+.cursorDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.25s var(--ease);
+}
+
+.cursor.hovered .cursorRing {
+  width: 78px;
+  height: 78px;
+  border-color: var(--accent);
+  background: rgba(216, 255, 69, 0.15);
+  backdrop-filter: blur(2px);
+}
+
+.cursor.hovered .cursorDot {
+  transform: scale(0);
+}
+
+.cursorLabel {
+  position: absolute;
+  font: 600 0.58rem var(--mono);
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.25s var(--ease), transform 0.25s var(--ease);
+  text-transform: uppercase;
+}
+
+.cursor.hovered .cursorLabel {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ================================================================
+   TOP BAR CONTRACT (3 Clean Zones, Zero Pill Clutter)
+   ================================================================ */
+.frame {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-frame);
+  pointer-events: none;
+  padding: 1.5rem var(--pad);
+}
+
+.navBar {
+  pointer-events: auto;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.4rem;
+  background: rgba(14, 18, 30, 0.72);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--surface-border);
+  border-radius: 9999px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  transition: transform 0.42s var(--ease), opacity 0.35s ease, border-color 0.4s var(--ease);
+  will-change: transform, opacity;
+}
+
+.navBar.navHidden {
+  transform: translateY(-160%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.navBar:hover {
+  border-color: var(--surface-border-hover);
+}
+
+/* Zone 1: Single Brand Wordmark */
+.brand {
+  font: 600 0.88rem var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.brand span {
+  color: var(--accent);
+}
+
+/* Zone 2: Navigation Links (Clean unboxed text links) */
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.2rem, 3vw, 2.5rem);
+}
+
+.navLink {
+  font: 500 0.72rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  position: relative;
+  padding-block: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 1px;
+  background: var(--accent);
+  transition: width 0.35s var(--ease);
+}
+
+.navLink:hover {
+  color: var(--text-main);
+}
+
+.navLink:hover::after {
+  width: 100%;
+}
+
+/* Zone 3: Single Primary Action */
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.menuBtn {
+  background: var(--accent);
+  color: #0c0d16;
+  font: 600 0.72rem var(--mono);
+  letter-spacing: 0.08em;
+  padding: 0.5rem 1.15rem;
+  border-radius: 9999px;
+  cursor: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+}
+
+.menuBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+/* Vertical Scroll Progress Bar */
+.scrollProgressTracker {
+  position: absolute;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 120px;
+  background: var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.scrollProgressBar {
+  width: 100%;
+  height: 0%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+/* ================================================================
+   NAVIGATION MENU OVERLAY
+   ================================================================ */
+.menuOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  background: rgba(10, 13, 24, 0.96);
+  backdrop-filter: blur(30px);
+  transform: translateY(-101%);
+  visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(2rem, 6vw, 6rem) var(--pad);
+}
+
+.menuOverlay.open {
+  visibility: visible;
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.5rem;
+}
+
+.menuKicker {
+  font: 500 0.68rem var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.menuClose {
+  font: 500 0.7rem var(--mono);
+  letter-spacing: 0.12em;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 9999px;
+  cursor: none;
+  transition: all 0.3s;
+}
+
+.menuClose:hover {
+  background: var(--text-main);
+  color: #0c0d16;
+}
+
+.menuNav {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-block: auto;
+}
+
+.menuNavLink {
+  font-size: clamp(2.8rem, 8vw, 8rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.9;
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  transition: transform 0.4s var(--ease), color 0.4s;
+  width: fit-content;
+}
+
+.menuNavLink sup {
+  font: 400 0.85rem var(--mono);
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.menuNavLink:hover {
+  color: var(--text-main);
+  transform: translateX(1.5rem);
+}
+
+.menuFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+  font: 0.68rem var(--mono);
+  color: var(--text-dim);
+}
+
+/* Floating Hover Preview Card for Projects List */
+.projectFloatingPreview {
+  position: fixed;
+  z-index: var(--z-preview);
+  pointer-events: none;
+  width: 380px;
+  height: 240px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-elevated);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.75), 0 0 40px rgba(216, 255, 69, 0.15);
+  overflow: hidden;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
+  transition: opacity 0.35s var(--ease), transform 0.45s var(--ease);
+}
+
+.projectFloatingPreview.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.previewCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.previewOverlay {
+  position: absolute;
+  inset: 0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(12, 15, 26, 0.4) 0%, rgba(12, 15, 26, 0.85) 100%);
+}
+
+.previewTop {
+  display: flex;
+  justify-content: space-between;
+  font: 500 0.68rem var(--mono);
+  letter-spacing: 0.14em;
+  color: var(--accent);
+}
+
+.previewBottom .previewTitle {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #ffffff;
+}
+
+.previewBottom .previewCategory {
+  font: 0.68rem var(--mono);
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+}
+
+/* ================================================================
+   COMMON LAYOUT & TYPOGRAPHY
+   ================================================================ */
+main {
+  position: relative;
+  z-index: var(--z-content);
+  width: 100%;
+}
+
+.section {
+  position: relative;
+  width: 100%;
+  padding-inline: var(--pad);
+}
+
+.inner {
+  width: min(100%, var(--max));
+  margin-inline: auto;
+}
+
+.eyebrow {
+  font: 500 0.72rem var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* ================================================================
+   SECTION 1: HERO VIEWPORT
+   ================================================================ */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-top: clamp(6rem, 14vh, 9rem);
+  padding-bottom: clamp(3rem, 6vh, 5rem);
+  overflow: hidden;
+}
+
+.heroContent {
+  width: 100%;
+  max-width: 1440px;
+}
+
+.heroTitle {
+  margin: 1.5rem 0 0;
+  font-size: var(--hero-title);
+  font-weight: 600;
+  line-height: 0.8;
+  letter-spacing: -0.095em;
+  text-wrap: balance;
+}
+
+.heroLine {
+  display: block;
+  overflow: hidden;
+}
+
+.heroLine:nth-child(2) {
+  padding-left: clamp(2rem, 7vw, 10vw);
+}
+
+.heroLine:nth-child(3) {
+  padding-left: clamp(1rem, 3.5vw, 4vw);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.heroChar {
+  display: inline-block;
+  transform: translateY(110%);
+  will-change: transform;
+}
+
+.heroBottom {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-top: clamp(3rem, 7vh, 6rem);
+}
+
+.heroStatement {
+  max-width: 540px;
+  font-size: var(--lead-size);
+  line-height: 1.45;
+  color: var(--text-dim);
+  letter-spacing: -0.015em;
+}
+
+/* ================================================================
+   SECTION 2: MANIFESTO
+   ================================================================ */
+.manifesto {
+  min-height: 135svh;
+  padding-block: clamp(10rem, 18vh, 18rem);
+}
+
+.manifestoSticky {
+  position: sticky;
+  top: 18vh;
+  min-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.manifestoText {
+  max-width: 1280px;
+  font-size: clamp(2.3rem, 5.6vw, 7rem);
+  line-height: 1.05;
+  letter-spacing: -0.065em;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.manifestoText .muted {
+  color: var(--text-faint);
+}
+
+.manifestoText .italic {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.manifestoSub {
+  margin-top: 3rem;
+  max-width: 320px;
+  color: var(--text-dim);
+  font: 0.72rem/1.65 var(--mono);
+}
+
+/* ================================================================
+   SECTION 3: ABOUT (Interactive Parallax Cards)
+   ================================================================ */
+.about {
+  min-height: 195svh;
+  padding-block: clamp(8rem, 14vh, 16rem);
+}
+
+.aboutSticky {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.aboutCenter {
+  position: absolute;
+  z-index: 5;
+  text-align: center;
+  pointer-events: none;
+}
+
+.aboutCenter h2 {
+  font-size: var(--h2-title);
+  letter-spacing: -0.08em;
+  line-height: 0.85;
+  font-weight: 600;
+}
+
+.aboutCenter p {
+  max-width: 440px;
+  margin: 1.8rem auto 0;
+  font: 0.74rem/1.7 var(--mono);
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.aboutGrid {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.aboutCard {
+  position: absolute;
+  pointer-events: auto;
+  width: min(340px, 32vw);
+  padding: 1.75rem;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  background: var(--surface);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: border-color 0.4s var(--ease), transform 0.4s var(--ease);
+}
+
+.aboutCard:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.aboutCard:nth-child(1) { top: 16%; left: 6%; }
+.aboutCard:nth-child(2) { top: 18%; right: 6%; }
+.aboutCard:nth-child(3) { bottom: 16%; left: 8%; }
+.aboutCard:nth-child(4) { bottom: 14%; right: 8%; }
+
+.aboutCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  font: 500 0.68rem var(--mono);
+}
+
+.aboutCardNum {
+  color: var(--accent);
+}
+
+.aboutCard h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.65rem;
+  line-height: 1.2;
+}
+
+.aboutCard p {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* ================================================================
+   SECTION 4: THINGS (Selected Projects)
+   ================================================================ */
+.things {
+  padding-block: clamp(10rem, 16vh, 18rem);
+  position: relative;
+}
+
+.thingsHead {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
+  align-items: flex-end;
+  margin-bottom: clamp(4rem, 8vh, 8rem);
+}
+
+.thingsTitle {
+  font-size: var(--h2-title);
+  line-height: 0.8;
+  letter-spacing: -0.09em;
+  font-weight: 600;
+}
+
+.thingsIntro {
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 520px;
+  justify-self: end;
+}
+
+.projectList {
+  border-top: 1px solid var(--line);
+}
+
+.projectRow {
+  position: relative;
+  min-height: 175px;
+  display: grid;
+  grid-template-columns: 80px 1.4fr 1fr 140px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 1.8rem 1rem;
+  cursor: none;
+  text-decoration: none;
+  color: inherit;
+  transition: padding 0.5s var(--ease), background 0.4s ease;
+  overflow: hidden;
+}
+
+.projectRow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(216, 255, 69, 0.05), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.projectRow:hover {
+  padding-inline: 2.25rem;
+  background: rgba(26, 32, 54, 0.45);
+}
+
+.projectRow:hover::before {
+  opacity: 1;
+}
+
+.projectIndex {
+  font: 500 0.75rem var(--mono);
+  color: var(--text-faint);
+  transition: color 0.3s;
+}
+
+.projectRow:hover .projectIndex {
+  color: var(--accent);
+}
+
+.projectNameCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.projectName {
+  font-size: clamp(2.4rem, 5vw, 5.8rem);
+  font-weight: 600;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  transition: transform 0.6s var(--ease), color 0.3s;
+}
+
+.projectRow:hover .projectName {
+  transform: translateX(1rem);
+  color: #ffffff;
+}
+
+.projectDescCol {
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  padding-right: 1.5rem;
+}
+
+.projectMetaCol {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.projectCategory {
+  font: 500 0.68rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.projectActionBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: 600 0.68rem var(--mono);
+  color: var(--accent);
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(216, 255, 69, 0.3);
+  border-radius: 9999px;
+  background: rgba(216, 255, 69, 0.05);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.projectRow:hover .projectActionBadge {
+  background: var(--accent);
+  color: #0c0d16;
+  transform: scale(1.05);
+}
+
+/* ================================================================
+   SECTION 5: EXPERIMENTS (Laboratory Pinned Deck)
+   ================================================================ */
+.experiments {
+  min-height: 180svh;
+  padding-block: clamp(8rem, 14vh, 16rem);
+}
+
+.expSticky {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.expHeader {
+  margin-bottom: clamp(2rem, 5vh, 4rem);
+}
+
+.expHeader h2 {
+  font-size: var(--h2-title);
+  line-height: 0.85;
+  letter-spacing: -0.08em;
+  font-weight: 600;
+}
+
+.expDeck {
+  position: relative;
+  width: 100%;
+  height: clamp(340px, 45vh, 480px);
+  display: grid;
+  place-items: center;
+  perspective: 1200px;
+}
+
+.expCard {
+  position: absolute;
+  width: min(390px, 86vw);
+  height: 100%;
+  border-radius: 20px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-elevated);
+  backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  padding: 2.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  will-change: transform;
+  transition: border-color 0.4s var(--ease);
+}
+
+.expCard:hover {
+  border-color: var(--accent);
+}
+
+.expCard:nth-child(1) { transform: translate(-80px, 40px) rotate(-6deg); z-index: 1; }
+.expCard:nth-child(2) { transform: translate(0, 0) rotate(0deg); z-index: 2; }
+.expCard:nth-child(3) { transform: translate(80px, -30px) rotate(6deg); z-index: 3; }
+
+.expCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 500 0.7rem var(--mono);
+}
+
+.expCardSymbol {
+  font-size: 1.4rem;
+  color: var(--accent);
+}
+
+.expCard h3 {
+  font-size: clamp(2rem, 3.8vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+
+.expCard p {
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+/* ================================================================
+   SECTION 6: HUMAN & CONTACT
+   ================================================================ */
+.human {
+  padding-block: clamp(10rem, 18vh, 20rem);
+  border-top: 1px solid var(--line);
+}
+
+.humanTitle {
+  font-size: var(--hero-title);
+  line-height: 0.8;
+  letter-spacing: -0.09em;
+  font-weight: 600;
+  margin-bottom: clamp(4rem, 9vh, 9rem);
+}
+
+.humanTitle span {
+  display: block;
+}
+
+.humanGrid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 5rem;
+}
+
+.humanBio {
+  font-size: clamp(1.2rem, 2vw, 2.1rem);
+  line-height: 1.35;
+  letter-spacing: -0.03em;
+  color: var(--text-dim);
+}
+
+.humanBio em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--text-main);
+}
+
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+}
+
+.contactField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.contactLabel {
+  font: 500 0.68rem var(--mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.contactLink {
+  font-size: clamp(1.2rem, 2.2vw, 2.2rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: transform 0.3s var(--ease), color 0.3s;
+  width: fit-content;
+}
+
+.contactLink:hover {
+  color: var(--accent);
+  transform: translateX(0.6rem);
+}
+
+.contactSocials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.contactBtn {
+  font: 500 0.72rem var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.4rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 9999px;
+  cursor: none;
+  transition: border-color 0.3s, color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.contactBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: translateY(102%);
+  transition: transform 0.35s var(--ease);
+  z-index: -1;
+}
+
+.contactBtn:hover {
+  color: #0c0d16;
+  border-color: var(--accent);
+}
+
+.contactBtn:hover::before {
+  transform: translateY(0%);
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 3rem;
+  margin-top: 6rem;
+  border-top: 1px solid var(--line);
+  font: 0.68rem var(--mono);
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+}
+
+.footerFinal {
+  color: var(--text-main);
+}
+
+/* ================================================================
+   RESPONSIVE DESIGN SYSTEM
+   ================================================================ */
+@media (pointer: coarse) {
+  body { cursor: auto; }
+  .cursor, .projectFloatingPreview { display: none !important; }
+  .menuBtn, .projectRow, .contactBtn, .menuClose { cursor: pointer; }
+}
+
+@media (max-width: 960px) {
+  :root { --pad: 1.25rem; }
+  .navLinks { display: none; }
+  .scrollProgressTracker { display: none; }
+  .heroBottom { grid-template-columns: 1fr; }
+  .thingsHead { grid-template-columns: 1fr; }
+  .thingsIntro { justify-self: start; }
+  .projectRow { grid-template-columns: 50px 1fr auto; gap: 1rem; }
+  .projectDescCol { display: none; }
+  .humanGrid { grid-template-columns: 1fr; gap: 4rem; }
+  .contactGrid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .aboutCard { width: min(290px, 75vw); }
+  .aboutCard:nth-child(1) { top: 8%; left: 4%; }
+  .aboutCard:nth-child(2) { top: 12%; right: 4%; }
+  .aboutCard:nth-child(3) { bottom: 12%; left: 4%; }
+  .aboutCard:nth-child(4) { bottom: 6%; right: 4%; }
+  .expCard:nth-child(1) { transform: translate(-40px, 30px) rotate(-6deg) scale(0.85); }
+  .expCard:nth-child(2) { transform: translate(0, -20px) rotate(2deg) scale(0.9); }
+  .expCard:nth-child(3) { transform: translate(40px, 35px) rotate(8deg) scale(0.85); }
+  .footer { display: block; }
+  .footerFinal { margin-bottom: 0.8rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cursor, .projectFloatingPreview { display: none; }
+  body { cursor: auto; }
+}
+</style>
+</head>
+
+<body class="loading">
+
+<!-- Dynamic Moving Background (No static black) -->
+<canvas id="fluidBgCanvas" aria-hidden="true"></canvas>
+
+<!-- 3D Spatial Motion Physics Canvas (Three.js + Native Hardware WebGL) -->
+<canvas id="stage3dCanvas" aria-hidden="true"></canvas>
+
+<div class="ambientLighting" id="ambientLight" aria-hidden="true"></div>
+<div class="filmGrain" aria-hidden="true"></div>
+<div class="stageGradientMask" aria-hidden="true"></div>
+
+<!-- Fluid Magnetic Cursor with Physics -->
+<div class="cursor" id="cursor" aria-hidden="true">
+  <div class="cursorRing"></div>
+  <div class="cursorWave"></div>
+  <div class="cursorDot"></div>
+  <span class="cursorLabel" id="cursorLabel">VIEW</span>
+</div>
+
+<!-- ==============================================================
+     PRELOADER: 3D PARTICLE ASSEMBLY + 2.0S CURTAIN-SPLIT REVEAL
+     ============================================================== -->
+<aside class="loader" id="loader" aria-label="Loading portfolio experience">
+  <div class="curtain curtainLeft" id="curtainLeft"></div>
+  <div class="curtain curtainRight" id="curtainRight"></div>
+  <div class="loaderStage" id="loaderStage">
+    <canvas id="loaderCanvas"></canvas>
+    <div class="loaderContent">
+      <div class="loaderNum" id="loaderNum">000</div>
+      <div class="loaderWord">
+        <span class="loaderLetter">U</span>
+        <span class="loaderLetter">Z</span>
+        <span class="loaderLetter">.</span>
+      </div>
+      <div class="loaderTrack">
+        <div class="loaderProgress" id="loaderProgressBar"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+  (function() {
+    // Autonomous Preloader Ticker: Runs immediately from frame 0
+    // Guarantees counter always progresses from 000 to 100% on GitHub Pages
+    const num = document.getElementById("loaderNum");
+    const bar = document.getElementById("loaderProgressBar");
+    const loader = document.getElementById("loader");
+    const left = document.getElementById("curtainLeft");
+    const right = document.getElementById("curtainRight");
+    const stage = document.getElementById("loaderStage");
+    const start = performance.now();
+    let done = false;
+
+    window.__splitCurtains = function() {
+      if (done) return;
+      done = true;
+      if (stage) { stage.style.opacity = '0'; stage.style.transition = 'opacity 0.35s ease'; }
+      if (left) { left.style.transform = 'translateX(-102%)'; left.style.transition = 'transform 0.95s cubic-bezier(0.16, 1, 0.3, 1)'; }
+      if (right) { right.style.transform = 'translateX(102%)'; right.style.transition = 'transform 0.95s cubic-bezier(0.16, 1, 0.3, 1)'; }
+      setTimeout(function() {
+        if (loader) loader.remove();
+        document.body.classList.remove("loading");
+        if (window.__initMotion) window.__initMotion();
+      }, 1000);
+    };
+
+    function step(now) {
+      if (done) return;
+      const progress = Math.min(100, ((now - start) / 2000) * 100);
+      const p = Math.floor(progress);
+      if (num) num.textContent = String(p).padStart(3, "0");
+      if (bar) bar.style.width = p + "%";
+      if (progress >= 100) {
+        window.__splitCurtains();
+      } else {
+        requestAnimationFrame(step);
+      }
+    }
+    requestAnimationFrame(step);
+    setTimeout(window.__splitCurtains, 2500); // 2.5s hard safety net
+  })();
+  </script>
+</aside>
+
+<!-- ==============================================================
+     TOP NAVIGATION BAR (Strict 3-Zone Contract)
+     ============================================================== -->
+<header class="frame" role="banner">
+  <nav class="navBar" aria-label="Primary site navigation">
+    <!-- Zone 1: Single text wordmark -->
+    <a href="#top" class="brand magnetic" data-cursor="TOP" aria-label="Uzair home">
+      U<span>/</span>M
+    </a>
+
+    <!-- Zone 2: Navigation Links -->
+    <div class="navLinks">
+      <a href="#about" class="navLink magnetic" data-cursor="ABOUT">About</a>
+      <a href="#things" class="navLink magnetic" data-cursor="THINGS">Things</a>
+      <a href="#experiments" class="navLink magnetic" data-cursor="LAB">Experiments</a>
+      <a href="#contact" class="navLink magnetic" data-cursor="CONTACT">Contact</a>
+    </div>
+
+    <!-- Zone 3: Primary Action -->
+    <div class="navActions">
+      <button class="menuBtn magnetic" id="menuToggle" data-cursor="MENU" aria-label="Open full index">
+        INDEX ↗
+      </button>
+    </div>
+  </nav>
+
+  <!-- Vertical Scroll Progress Tracker -->
+  <div class="scrollProgressTracker" aria-hidden="true">
+    <div class="scrollProgressBar" id="scrollProgress"></div>
+  </div>
+</header>
+
+<!-- Overlay Fullscreen Navigation Menu -->
+<div class="menuOverlay" id="menuOverlay" role="dialog" aria-modal="true" aria-label="Navigation index">
+  <div class="menuHeader">
+    <div class="menuKicker">Navigation Index</div>
+    <button class="menuClose magnetic" id="menuClose" data-cursor="CLOSE">CLOSE ×</button>
+  </div>
+  <nav class="menuNav">
+    <a href="#about" class="menuNavLink magnetic" data-cursor="VIEW">About <sup>01</sup></a>
+    <a href="#things" class="menuNavLink magnetic" data-cursor="VIEW">Things <sup>02</sup></a>
+    <a href="#experiments" class="menuNavLink magnetic" data-cursor="VIEW">Experiments <sup>03</sup></a>
+    <a href="#contact" class="menuNavLink magnetic" data-cursor="VIEW">Contact <sup>04</sup></a>
+  </nav>
+  <div class="menuFooter">
+    <span>Uzair · Builder & Developer</span>
+    <span>boredompeaks</span>
+  </div>
+</div>
+
+<!-- Floating Hover Preview Card for Projects List -->
+<div class="projectFloatingPreview" id="floatingPreview" aria-hidden="true">
+  <canvas class="previewCanvas" id="previewCanvas"></canvas>
+  <div class="previewOverlay">
+    <div class="previewTop">
+      <span id="previewNumber">01</span>
+      <span id="previewCategory">CATEGORY</span>
+    </div>
+    <div class="previewBottom">
+      <div class="previewTitle" id="previewTitle">Project Name</div>
+      <div class="previewCategory" id="previewSub">Exploration</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================================================
+     MAIN VIEWPORT SECTIONS
+     ============================================================== -->
+<main id="top">
+
+  <!-- 1. HERO VIEWPORT -->
+  <section class="section hero" aria-label="Hero Introduction">
+    <div class="inner">
+      <div class="heroContent">
+        <div class="eyebrow">Uzair Malkani · Creative Developer</div>
+        <h1 class="heroTitle">
+          <span class="heroLine">
+            <span class="heroChar">B</span><span class="heroChar">U</span><span class="heroChar">I</span><span class="heroChar">L</span><span class="heroChar">D</span>
+          </span>
+          <span class="heroLine">
+            <span class="heroChar">T</span><span class="heroChar">H</span><span class="heroChar">I</span><span class="heroChar">N</span><span class="heroChar">G</span><span class="heroChar">S</span><span class="heroChar">.</span>
+          </span>
+          <span class="heroLine">
+            <span class="heroChar">U</span><span class="heroChar">n</span><span class="heroChar">d</span><span class="heroChar">e</span><span class="heroChar">r</span><span class="heroChar">s</span><span class="heroChar">t</span><span class="heroChar">a</span><span class="heroChar">n</span><span class="heroChar">d</span><span class="heroChar">.</span>
+          </span>
+        </h1>
+        <div class="heroBottom">
+          <p class="heroStatement">
+            developer, builder, and systems thinker. Exploring code, graphics, architecture, and anything interesting enough to pull apart.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. MANIFESTO -->
+  <section class="section manifesto" aria-label="Philosophy Manifesto">
+    <div class="inner manifestoSticky">
+      <div class="eyebrow">Working Philosophy</div>
+      <blockquote class="manifestoText">
+        "Most things in software are <span class="muted">accidents of history.</span> Once you realize that, you realize you can <span class="italic">build better ones.</span>"
+      </blockquote>
+      <div class="manifestoSub">
+        First principles. Rigorous systems. No boilerplate thinking.
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. ABOUT VIEWPORT (Interactive Parallax Cards) -->
+  <section class="section about" id="about" aria-label="About Uzair">
+    <div class="aboutSticky">
+      <div class="aboutCenter">
+        <div class="eyebrow">Selected Principles</div>
+        <h2>THE STACK.</h2>
+        <p>Curiosity as an engineering methodology. Designing interfaces and systems that reward deep scrutiny.</p>
+      </div>
+      <div class="aboutGrid" id="aboutGrid">
+        <!-- Injected dynamically from CONFIG -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. THINGS (Selected Projects) -->
+  <section class="section things" id="things" aria-label="Selected Projects">
+    <div class="inner">
+      <header class="thingsHead">
+        <div>
+          <div class="eyebrow">Index of Works</div>
+          <h2 class="thingsTitle">THINGS.</h2>
+        </div>
+        <p class="thingsIntro">
+          A selection of applications, systems experiments, and deep visual investigations built over the past several years.
+        </p>
+      </header>
+      <div class="projectList" id="projectList">
+        <!-- Injected dynamically from CONFIG -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. EXPERIMENTS (Interactive Laboratory Pinned Stage) -->
+  <section class="section experiments" id="experiments" aria-label="Interactive Experiments">
+    <div class="inner expSticky">
+      <header class="expHeader">
+        <div class="eyebrow">The Laboratory</div>
+        <h2>EXPERIMENTS.</h2>
+      </header>
+      <div class="expDeck" id="expDeck">
+        <!-- Injected dynamically from CONFIG -->
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. HUMAN & CONTACT VIEWPORT -->
+  <section class="section human" id="contact" aria-label="Contact and Info">
+    <div class="inner">
+      <h2 class="humanTitle">
+        <span>LET'S BUILD</span>
+        <span>SOMETHING REAL.</span>
+      </h2>
+      <div class="humanGrid">
+        <div>
+          <div class="eyebrow">Biography</div>
+          <p class="humanBio">
+            Uzair is a builder interested in <em>novel interaction models</em>, cryptographic networks, machine learning interfaces, and high-performance digital engines.
+          </p>
+        </div>
+        <div class="contactGrid">
+          <div class="contactField">
+            <span class="contactLabel">Direct Channel</span>
+            <a href="mailto:uzairmalkani2010@gmail.com" class="contactLink magnetic" data-cursor="WRITE">
+              uzairmalkani2010@gmail.com ↗
+            </a>
+          </div>
+          <div class="contactField">
+            <span class="contactLabel">Digital Presence</span>
+            <div class="contactSocials">
+              <a href="https://github.com/boredompeaks" target="_blank" rel="noopener noreferrer" class="contactBtn magnetic" data-cursor="CODE">
+                GitHub ↗
+              </a>
+              <a href="https://x.com/uzair_malkani" target="_blank" rel="noopener noreferrer" class="contactBtn magnetic" data-cursor="X">
+                Twitter / X ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <div>
+          <span>Uzair Malkani · All Systems Operational</span>
+        </div>
+        <div class="footerFinal">
+          <span>&copy; <span id="currentYear">2026</span> · boredompeaks</span>
+        </div>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script type="module">
+// Resilient module & global resolution (Works on GitHub Pages, Vite, or direct file load)
+let THREE = window.THREE;
+let gsap = window.gsap;
+let ScrollTrigger = window.ScrollTrigger;
+let Lenis = window.Lenis;
+
+try {
+  if (!THREE) {
+    const tm = await import('three');
+    THREE = tm.default || tm;
+    window.THREE = THREE;
+  }
+} catch (e) {
+  THREE = window.THREE;
+}
+
+try {
+  if (!gsap) {
+    const gm = await import('gsap');
+    gsap = gm.gsap || gm.default || gm;
+    window.gsap = gsap;
+  }
+} catch (e) {
+  gsap = window.gsap;
+}
+
+try {
+  if (!ScrollTrigger) {
+    const sm = await import('gsap/ScrollTrigger');
+    ScrollTrigger = sm.ScrollTrigger || sm.default || sm;
+    window.ScrollTrigger = ScrollTrigger;
+  }
+} catch (e) {
+  ScrollTrigger = window.ScrollTrigger;
+}
+
+try {
+  if (!Lenis) {
+    const lm = await import('lenis');
+    Lenis = lm.default || lm;
+    window.Lenis = Lenis;
+  }
+} catch (e) {
+  Lenis = window.Lenis;
+}
+
+if (gsap && ScrollTrigger) {
+  try { gsap.registerPlugin(ScrollTrigger); } catch (e) {}
+}
+/* ================================================================
+   GLOBAL JAVASCRIPT CONTROL DECK (CONFIG)
+   Central source of truth for content, projects, and physics constants
+   ================================================================ */
+const CONFIG = {
+  identity: {
+    name: "Uzair",
+    fullName: "Uzair Malkani",
+    tagline: "Build Things. Understand Things.",
+    bio: "developer, builder, and systems thinker.",
+    handle: "boredompeaks",
+    email: "uzairmalkani2010@gmail.com",
+    github: "https://github.com/boredompeaks",
+    twitter: "https://x.com/uzair_malkani"
+  },
+  aboutCards: [
+    {
+      number: "01",
+      theme: "foundation",
+      title: "CODE IS CRAFT",
+      text: "Every abstraction has a cost. Understanding the layers underneath is the only reliable way to build software that actually lasts."
+    },
+    {
+      number: "02",
+      theme: "approach",
+      title: "FROM ZERO",
+      text: "The best way to understand an algorithm or system is to construct it without libraries. If you cannot implement it from memory, you do not own it."
+    },
+    {
+      number: "03",
+      theme: "philosophy",
+      title: "SYSTEMS THINKING",
+      text: "Components do not exist in isolation. Software is state machines, network latency, human psychology, and memory caches colliding in real time."
+    },
+    {
+      number: "04",
+      theme: "ambition",
+      title: "PERPETUAL ITERATION",
+      text: "Shipping is an inflection point, not a destination. What matters is the velocity of feedback loops and unrelenting refinement."
+    }
+  ],
+  projects: [
+    {
+      number: "01",
+      name: "SecureChat",
+      category: "cryptography / systems",
+      description: "End-to-end encrypted messaging with zero-knowledge architecture, ephemeral keys, and forward secrecy.",
+      href: "",
+      visualTheme: "crypto",
+      enabled: true
+    },
+    {
+      number: "02",
+      name: "Limbus",
+      category: "vision / neural",
+      description: "Deep learning vision system for autonomous anomaly detection and spatial tracking in dense visual feeds.",
+      href: "",
+      visualTheme: "neural",
+      enabled: true
+    },
+    {
+      number: "03",
+      name: "The Store",
+      category: "infrastructure / commerce",
+      description: "High-throughput commerce engine built for sub-50ms catalog indexing, live inventory sync, and instant checkout.",
+      href: "",
+      visualTheme: "commerce",
+      enabled: true
+    },
+    {
+      number: "04",
+      name: "Nexus",
+      category: "android / ML",
+      description: "An experimental ML-powered Android keyboard exploring glide input, personalization, prediction and on-device intelligence.",
+      href: "",
+      visualTheme: "kinetic",
+      enabled: true
+    },
+    {
+      number: "05",
+      name: "Other Things",
+      category: "experiments / unknown",
+      description: "Visual experiments, diagrams, prototypes and ideas that don't quite belong anywhere else.",
+      href: "",
+      visualTheme: "abstract",
+      enabled: true
+    }
+  ],
+  experiments: [
+    {
+      number: "001",
+      category: "visual",
+      title: "MAKE<br> A PICTURE.",
+      text: "Diagrams, compositions, strange visual experiments and anything else that refuses to remain inside a code editor.",
+      symbol: "◌"
+    },
+    {
+      number: "002",
+      category: "systems",
+      title: "BREAK<br> THE THING.",
+      text: "Build it. Test it. Try to make it fail. Understand the failure. Build it again.",
+      symbol: "⌁"
+    },
+    {
+      number: "003",
+      category: "unknown",
+      title: "WHAT<br> IF?",
+      text: "The most dangerous two words in the vocabulary of someone with too much curiosity and a computer.",
+      symbol: "?"
+    }
+  ],
+  animation: {
+    loaderDuration: 2.0,      /* Strict 2.0 Seconds */
+    loaderFailSafe: 2.5,      /* 2.5s Hard Safety Net */
+    particlesCount: 3200,
+    dustCount: 1100,
+    magneticFactor: 0.35
+  }
+};
+
+/* ================================================================
+   DOM SELECTION HELPERS & DEVICE CAPABILITY
+   ================================================================ */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+const isTouch = window.matchMedia("(pointer: coarse)").matches;
+const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const isMobile = window.innerWidth <= 800;
+
+/* ================================================================
+   DYNAMIC CONTENT RENDERING
+   ================================================================ */
+function renderDynamicContent() {
+  $("#currentYear").textContent = new Date().getFullYear();
+
+  // About Cards
+  const aboutGrid = $("#aboutGrid");
+  aboutGrid.innerHTML = CONFIG.aboutCards.map(c => `
+    <article class="aboutCard">
+      <div class="aboutCardHeader">
+        <span class="aboutCardNum">${c.number} / ${c.theme}</span>
+      </div>
+      <h3>${c.title}</h3>
+      <p>${c.text}</p>
+    </article>
+  `).join("");
+
+  // Projects List
+  const projectList = $("#projectList");
+  projectList.innerHTML = CONFIG.projects.filter(p => p.enabled).map(p => `
+    <a class="projectRow magnetic" href="${p.href || "#"}" data-cursor="OPEN" data-project="${p.name}">
+      <div class="projectIndex">${p.number}</div>
+      <div class="projectNameCol">
+        <h3 class="projectName">${p.name}</h3>
+      </div>
+      <div class="projectDescCol">
+        ${p.description}
+      </div>
+      <div class="projectMetaCol">
+        <span class="projectCategory">${p.category}</span>
+        <span class="projectActionBadge">EXPLORE ↗</span>
+      </div>
+    </a>
+  `).join("");
+
+  // Experiments Deck
+  const expDeck = $("#expDeck");
+  expDeck.innerHTML = CONFIG.experiments.map(e => `
+    <article class="expCard">
+      <div class="expCardTop">
+        <span class="eyebrow" style="margin:0">${e.number} / ${e.category}</span>
+        <span class="expCardSymbol">${e.symbol}</span>
+      </div>
+      <h3>${e.title}</h3>
+      <p>${e.text}</p>
+    </article>
+  `).join("");
+}
+renderDynamicContent();
+
+/* ================================================================
+   DYNAMIC MOVING BACKGROUND (NO STATIC BLACK)
+   Generative chromatic energy fields and undulating waves
+   ================================================================ */
+const fluidCanvas = $("#fluidBgCanvas");
+const fluidCtx = fluidCanvas ? fluidCanvas.getContext("2d") : null;
+let bgW = (fluidCanvas.width = window.innerWidth);
+let bgH = (fluidCanvas.height = window.innerHeight);
+
+window.addEventListener("resize", () => {
+  bgW = fluidCanvas.width = window.innerWidth;
+  bgH = fluidCanvas.height = window.innerHeight;
+}, { passive: true });
+
+let mouseX = window.innerWidth * 0.5;
+let mouseY = window.innerHeight * 0.4;
+let targetMouseX = mouseX;
+let targetMouseY = mouseY;
+
+window.addEventListener("mousemove", e => {
+  targetMouseX = e.clientX;
+  targetMouseY = e.clientY;
+}, { passive: true });
+
+let fluidTime = 0;
+function renderFluidBackground() {
+  if (document.hidden) {
+    requestAnimationFrame(renderFluidBackground);
+    return;
+  }
+  fluidTime += 0.007;
+
+  // Inertia mouse smoothing
+  mouseX += (targetMouseX - mouseX) * 0.06;
+  mouseY += (targetMouseY - mouseY) * 0.06;
+
+  document.documentElement.style.setProperty("--mouse-x", `${(mouseX / bgW) * 100}%`);
+  document.documentElement.style.setProperty("--mouse-y", `${(mouseY / bgH) * 100}%`);
+
+  if (fluidCtx) {
+    // 1. Deep Atmospheric Dark Base (Rich navy/obsidian gradient - never flat black)
+    const baseGrad = fluidCtx.createLinearGradient(0, 0, bgW, bgH);
+    baseGrad.addColorStop(0, "#0b0d18");
+    baseGrad.addColorStop(0.5, "#0e1122");
+    baseGrad.addColorStop(1, "#070912");
+    fluidCtx.fillStyle = baseGrad;
+    fluidCtx.fillRect(0, 0, bgW, bgH);
+
+    // 2. Chromatic Light Orbs reacting to cursor momentum & time
+    const orbs = [
+      { x: bgW * 0.25 + Math.sin(fluidTime * 0.8) * 180, y: bgH * 0.3 + Math.cos(fluidTime * 0.6) * 120, r: 480, col: "rgba(30, 48, 88, 0.42)" },
+      { x: bgW * 0.75 + Math.cos(fluidTime * 0.7) * 200, y: bgH * 0.65 + Math.sin(fluidTime * 0.5) * 140, r: 520, col: "rgba(24, 62, 54, 0.35)" },
+      { x: mouseX, y: mouseY, r: 420, col: "rgba(52, 28, 64, 0.28)" }
+    ];
+
+    orbs.forEach(orb => {
+      const grad = fluidCtx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+      grad.addColorStop(0, orb.col);
+      grad.addColorStop(1, "rgba(11, 13, 24, 0)");
+      fluidCtx.fillStyle = grad;
+      fluidCtx.beginPath();
+      fluidCtx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+      fluidCtx.fill();
+    });
+
+    // 3. Fluid undulating cosmic current lines
+    fluidCtx.lineWidth = 1;
+    const waveCount = 3;
+    for (let w = 0; w < waveCount; w++) {
+      fluidCtx.strokeStyle = w === 0 ? "rgba(216, 255, 69, 0.035)" : "rgba(61, 243, 184, 0.025)";
+      fluidCtx.beginPath();
+      const waveBaseY = bgH * (0.35 + w * 0.2);
+      for (let x = 0; x <= bgW; x += 30) {
+        const y = waveBaseY + Math.sin(x * 0.003 + fluidTime * 1.5 + w) * 55 + Math.cos(x * 0.0015 - fluidTime) * 35;
+        if (x === 0) fluidCtx.moveTo(x, y);
+        else fluidCtx.lineTo(x, y);
+      }
+      fluidCtx.stroke();
+    }
+  }
+
+  requestAnimationFrame(renderFluidBackground);
+}
+renderFluidBackground();
+
+/* ================================================================
+   FLUID MAGNETIC CURSOR WITH VELOCITY & SPRING PHYSICS
+   ================================================================ */
+// Disable text copy, cut, and selection across the website
+window.addEventListener("copy", e => { e.preventDefault(); return false; });
+window.addEventListener("cut", e => { e.preventDefault(); return false; });
+window.addEventListener("selectstart", e => { e.preventDefault(); return false; });
+
+const cursor = $("#cursor");
+const cursorRing = $(".cursorRing");
+const cursorDot = $(".cursorDot");
+const cursorLabel = $("#cursorLabel");
+
+let curX = mouseX, curY = mouseY;
+let ringX = mouseX, ringY = mouseY;
+let repelTimeout = null;
+
+if (!isTouch && !isReduced) {
+  window.addEventListener("mousemove", () => {
+    cursor.classList.add("repelling");
+    clearTimeout(repelTimeout);
+    repelTimeout = setTimeout(() => {
+      cursor.classList.remove("repelling");
+    }, 180);
+  }, { passive: true });
+
+  window.addEventListener("mousedown", () => {
+    cursor.classList.add("clicking");
+  });
+  window.addEventListener("mouseup", () => {
+    cursor.classList.remove("clicking");
+  });
+
+  function updateCursorPhysics() {
+    // Spring damping
+    ringX += (mouseX - ringX) * 0.18;
+    ringY += (mouseY - ringY) * 0.18;
+    curX += (mouseX - curX) * 0.55;
+    curY += (mouseY - curY) * 0.55;
+
+    cursor.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+    cursorDot.style.transform = `translate3d(${curX - ringX}px, ${curY - ringY}px, 0)`;
+
+    requestAnimationFrame(updateCursorPhysics);
+  }
+  requestAnimationFrame(updateCursorPhysics);
+
+  // Magnetic elements binding
+  $$(".magnetic").forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      cursor.classList.add("hovered");
+      const label = el.dataset.cursor;
+      if (label) cursorLabel.textContent = label;
+    });
+
+    el.addEventListener("mouseleave", () => {
+      cursor.classList.remove("hovered");
+      cursorLabel.textContent = "VIEW";
+      el.style.transform = "none";
+    });
+
+    el.addEventListener("mousemove", e => {
+      const rect = el.getBoundingClientRect();
+      const relX = e.clientX - (rect.left + rect.width / 2);
+      const relY = e.clientY - (rect.top + rect.height / 2);
+      el.style.transform = `translate3d(${relX * CONFIG.animation.magneticFactor}px, ${relY * CONFIG.animation.magneticFactor}px, 0)`;
+    });
+  });
+}
+
+/* ================================================================
+   PROJECT HOVER PREVIEWS
+   ================================================================ */
+const floatingPreview = $("#floatingPreview");
+const previewCanvas = $("#previewCanvas");
+const previewNumber = $("#previewNumber");
+const previewCategory = $("#previewCategory");
+const previewTitle = $("#previewTitle");
+const previewSub = $("#previewSub");
+
+let prevCtx = null;
+let currentProjectTheme = "crypto";
+let previewTime = 0;
+
+if (previewCanvas) {
+  prevCtx = previewCanvas.getContext("2d");
+  function resizePreview() {
+    previewCanvas.width = 380 * Math.min(window.devicePixelRatio, 2);
+    previewCanvas.height = 240 * Math.min(window.devicePixelRatio, 2);
+  }
+  resizePreview();
+}
+
+function renderProjectPreviewCanvas() {
+  if (!prevCtx) return;
+  const pw = previewCanvas.width;
+  const ph = previewCanvas.height;
+  previewTime += 0.04;
+
+  prevCtx.fillStyle = "#0c0f1a";
+  prevCtx.fillRect(0, 0, pw, ph);
+
+  if (currentProjectTheme === "crypto") {
+    prevCtx.strokeStyle = "rgba(216, 255, 69, 0.4)";
+    prevCtx.lineWidth = 1.5;
+    for (let x = 30; x < pw; x += 35) {
+      for (let y = 30; y < ph; y += 35) {
+        const offset = Math.sin(previewTime + x * 0.02 + y * 0.02) * 10;
+        prevCtx.beginPath();
+        prevCtx.arc(x + offset, y + offset, 2.8, 0, Math.PI * 2);
+        prevCtx.stroke();
+      }
+    }
+  } else if (currentProjectTheme === "neural") {
+    prevCtx.strokeStyle = "rgba(61, 243, 184, 0.6)";
+    prevCtx.lineWidth = 2.5;
+    prevCtx.beginPath();
+    for (let x = 0; x < pw; x += 8) {
+      const y = ph / 2 + Math.sin(x * 0.02 + previewTime) * 40 + Math.cos(x * 0.01 - previewTime * 0.6) * 22;
+      if (x === 0) prevCtx.moveTo(x, y);
+      else prevCtx.lineTo(x, y);
+    }
+    prevCtx.stroke();
+  } else if (currentProjectTheme === "commerce") {
+    prevCtx.strokeStyle = "rgba(216, 255, 69, 0.5)";
+    prevCtx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      const r = 25 + i * 20 + Math.sin(previewTime + i) * 8;
+      prevCtx.beginPath();
+      prevCtx.arc(pw / 2, ph / 2, r, 0, Math.PI * 2);
+      prevCtx.stroke();
+    }
+  } else if (currentProjectTheme === "kinetic") {
+    prevCtx.strokeStyle = "rgba(216, 255, 69, 0.7)";
+    prevCtx.lineWidth = 3;
+    prevCtx.beginPath();
+    prevCtx.moveTo(pw * 0.15, ph * 0.85);
+    prevCtx.bezierCurveTo(
+      pw * 0.4 + Math.sin(previewTime) * 60,
+      ph * 0.15 + Math.cos(previewTime) * 50,
+      pw * 0.65 - Math.cos(previewTime) * 50,
+      ph * 0.9,
+      pw * 0.85,
+      ph * 0.25
+    );
+    prevCtx.stroke();
+  } else {
+    prevCtx.fillStyle = "rgba(216, 255, 69, 0.2)";
+    for (let i = 0; i < 24; i++) {
+      const a = (i / 24) * Math.PI * 2 + previewTime * 0.6;
+      const rx = pw / 2 + Math.cos(a) * (70 + Math.sin(previewTime * 2 + i) * 25);
+      const ry = ph / 2 + Math.sin(a) * (70 + Math.sin(previewTime * 2 + i) * 25);
+      prevCtx.beginPath();
+      prevCtx.arc(rx, ry, 3.5, 0, Math.PI * 2);
+      prevCtx.fill();
+    }
+  }
+
+  requestAnimationFrame(renderProjectPreviewCanvas);
+}
+renderProjectPreviewCanvas();
+
+let fpX = mouseX, fpY = mouseY;
+if (!isTouch && !isReduced) {
+  const updatePreviewPos = () => {
+    fpX += (mouseX + 45 - fpX) * 0.15;
+    fpY += (mouseY - 20 - fpY) * 0.15;
+    floatingPreview.style.left = `${fpX}px`;
+    floatingPreview.style.top = `${fpY}px`;
+  };
+  setInterval(updatePreviewPos, 16);
+
+  $$(".projectRow").forEach(row => {
+    row.addEventListener("mouseenter", () => {
+      const name = row.dataset.project;
+      const proj = CONFIG.projects.find(p => p.name === name);
+      if (proj) {
+        currentProjectTheme = proj.visualTheme;
+        previewNumber.textContent = proj.number;
+        previewCategory.textContent = proj.category;
+        previewTitle.textContent = proj.name;
+        previewSub.textContent = proj.category;
+        floatingPreview.classList.add("active");
+      }
+    });
+    row.addEventListener("mouseleave", () => {
+      floatingPreview.classList.remove("active");
+    });
+  });
+}
+
+/* ================================================================
+   3D SPATIAL MOTION PHYSICS ENGINE
+   Robust Dual-Architecture: High-Performance Three.js + Standalone Native WebGL
+   Works 100% reliably in any environment (Vite, CDN, or offline sandboxes)
+   ================================================================ */
+
+class Vector3 {
+  constructor(x=0, y=0, z=0) { this.x = x; this.y = y; this.z = z; }
+  set(x, y, z) { this.x = x; this.y = y; this.z = z; return this; }
+}
+
+// Global 3D State
+let globalScrollProgress = 0;
+let globalShockwave = 0;
+let globalRotX = 0, globalRotY = 0;
+let targetRotX = 0, targetRotY = 0;
+
+// Dynamic Navbar hide on scroll down, pop up on even a bit scroll up
+const navBar = $(".navBar");
+let lastScrollY = window.scrollY;
+let navHidden = false;
+
+function updateNavVisibility() {
+  if (!navBar) return;
+  const currentScrollY = window.scrollY;
+  const delta = currentScrollY - lastScrollY;
+
+  if (currentScrollY <= 40) {
+    if (navHidden) {
+      navBar.classList.remove("navHidden");
+      navHidden = false;
+    }
+  } else if (delta > 4 && !navHidden) {
+    // Scrolling down -> smoothly hide
+    navBar.classList.add("navHidden");
+    navHidden = true;
+  } else if (delta < -2 && navHidden) {
+    // Scrolling up even slightly -> immediately pop up
+    navBar.classList.remove("navHidden");
+    navHidden = false;
+  }
+  lastScrollY = currentScrollY;
+}
+
+window.addEventListener("scroll", () => {
+  const total = document.documentElement.scrollHeight - window.innerHeight;
+  globalScrollProgress = total > 0 ? window.scrollY / total : 0;
+  updateNavVisibility();
+}, { passive: true });
+
+window.addEventListener("mousemove", e => {
+  targetRotY = (e.clientX / window.innerWidth - 0.5) * 1.2;
+  targetRotX = (e.clientY / window.innerHeight - 0.5) * -0.7;
+}, { passive: true });
+
+window.addEventListener("click", () => {
+  globalShockwave = 1.35;
+});
+
+/* ================================================================
+   ENGINE A: STANDALONE HARDWARE WEBGL GLSL SHADER & PHYSICS ENGINE
+   Written completely from scratch with pure WebGL API & hardware shaders
+   ================================================================ */
+class StandaloneWebGL3DEngine {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.gl = canvas.getContext("webgl", { alpha: true, antialias: true, powerPreference: "high-performance" }) ||
+              canvas.getContext("experimental-webgl", { alpha: true, antialias: true });
+    if (!this.gl) throw new Error("WebGL not supported");
+    this.init();
+  }
+
+  init() {
+    const gl = this.gl;
+    this.resize();
+    window.addEventListener("resize", () => this.resize(), { passive: true });
+
+    // Enable additive blending for glowing spatial aesthetics
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.disable(gl.DEPTH_TEST);
+
+    // GLSL Vertex & Fragment Shaders
+    const vsSource = `
+      attribute vec3 aPosition;
+      attribute vec4 aColor;
+      attribute float aSize;
+      uniform mat4 uMatrix;
+      varying vec4 vColor;
+      void main() {
+        gl_Position = uMatrix * vec4(aPosition, 1.0);
+        float pDist = gl_Position.w;
+        gl_PointSize = max(1.0, (aSize * 750.0) / max(0.5, pDist));
+        vColor = aColor;
+      }
+    `;
+
+    const fsSource = `
+      precision mediump float;
+      varying vec4 vColor;
+      void main() {
+        vec2 coord = gl_PointCoord - vec2(0.5);
+        float dist = length(coord);
+        if (dist > 0.5) discard;
+        float alpha = smoothstep(0.5, 0.0, dist) * vColor.a;
+        gl_FragColor = vec4(vColor.rgb, alpha);
+      }
+    `;
+
+    this.program = this.createProgram(vsSource, fsSource);
+    this.aPosition = gl.getAttribLocation(this.program, "aPosition");
+    this.aColor = gl.getAttribLocation(this.program, "aColor");
+    this.aSize = gl.getAttribLocation(this.program, "aSize");
+    this.uMatrix = gl.getUniformLocation(this.program, "uMatrix");
+
+    // Line Program for Wireframe Shell & Torus Rings
+    const vsLine = `
+      attribute vec3 aPosition;
+      uniform mat4 uMatrix;
+      void main() {
+        gl_Position = uMatrix * vec4(aPosition, 1.0);
+      }
+    `;
+    const fsLine = `
+      precision mediump float;
+      uniform vec4 uLineColor;
+      void main() {
+        gl_FragColor = uLineColor;
+      }
+    `;
+    this.lineProg = this.createProgram(vsLine, fsLine);
+    this.aLinePos = gl.getAttribLocation(this.lineProg, "aPosition");
+    this.uLineMat = gl.getUniformLocation(this.lineProg, "uMatrix");
+    this.uLineColor = gl.getUniformLocation(this.lineProg, "uLineColor");
+
+    this.initGeometry();
+    this.time = 0;
+    this.animate = this.animate.bind(this);
+    requestAnimationFrame(this.animate);
+  }
+
+  resize() {
+    const w = this.canvas.width = window.innerWidth;
+    const h = this.canvas.height = window.innerHeight;
+    this.gl.viewport(0, 0, w, h);
+    this.aspect = w / h;
+  }
+
+  createProgram(vsSrc, fsSrc) {
+    const gl = this.gl;
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vs, vsSrc);
+    gl.compileShader(vs);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fs, fsSrc);
+    gl.compileShader(fs);
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    return prog;
+  }
+
+  initGeometry() {
+    const gl = this.gl;
+    // 1. Golden Ratio 30-Edge Icosahedron
+    const phi = (1 + Math.sqrt(5)) / 2;
+    const rawV = [
+      [-1,  phi, 0], [ 1,  phi, 0], [-1, -phi, 0], [ 1, -phi, 0],
+      [ 0, -1,  phi], [ 0,  1,  phi], [ 0, -1, -phi], [ 0,  1, -phi],
+      [ phi, 0, -1], [ phi, 0,  1], [-phi, 0, -1], [-phi, 0,  1]
+    ];
+    const icoV = rawV.map(v => {
+      const len = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+      return [(v[0]/len)*1.65, (v[1]/len)*1.65, (v[2]/len)*1.65];
+    });
+
+    const edgeLines = [];
+    for (let i = 0; i < icoV.length; i++) {
+      for (let j = i + 1; j < icoV.length; j++) {
+        const dx = icoV[i][0] - icoV[j][0];
+        const dy = icoV[i][1] - icoV[j][1];
+        const dz = icoV[i][2] - icoV[j][2];
+        const d = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        if (Math.abs(d - 1.73) < 0.45) {
+          edgeLines.push(...icoV[i], ...icoV[j]);
+        }
+      }
+    }
+    this.icoBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.icoBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(edgeLines), gl.STATIC_DRAW);
+    this.icoVertexCount = edgeLines.length / 3;
+
+    // 2. Gyroscopic Torus Rings
+    const ringLines = [];
+    this.rings = [
+      { r: 2.1, rx: 0.3, ry: 0.5, sx: 0.003, sy: 0.004 },
+      { r: 2.4, rx: 0.8, ry: -0.4, sx: -0.002, sy: 0.005 },
+      { r: 2.7, rx: -0.5, ry: 0.7, sx: 0.004, sy: -0.003 }
+    ];
+    this.ringBuffers = this.rings.map(ring => {
+      const pts = [];
+      const segs = 96;
+      for (let i = 0; i <= segs; i++) {
+        const th = (i / segs) * Math.PI * 2;
+        pts.push(Math.cos(th) * ring.r, Math.sin(th) * ring.r, 0);
+      }
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pts), gl.STATIC_DRAW);
+      return { buf, count: pts.length / 3 };
+    });
+
+    // 3. 3,200 Interactive Physics Particles
+    this.pCount = isMobile ? 1400 : CONFIG.animation.particlesCount;
+    this.particles = [];
+    this.posArray = new Float32Array(this.pCount * 3);
+    this.colArray = new Float32Array(this.pCount * 4);
+    this.sizeArray = new Float32Array(this.pCount);
+
+    for (let i = 0; i < this.pCount; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const b = Math.acos(2 * Math.random() - 1);
+      const rad = 1.35 + Math.random() * 2.8;
+      const orig = new Vector3(rad * Math.sin(b) * Math.cos(a), rad * Math.sin(b) * Math.sin(a), rad * Math.cos(b));
+
+      this.particles.push({
+        orig,
+        x: orig.x, y: orig.y, z: orig.z,
+        vx: 0, vy: 0, vz: 0
+      });
+
+      const isVolt = Math.random() < 0.75;
+      this.colArray[i * 4] = isVolt ? 0.85 : 0.24;
+      this.colArray[i * 4 + 1] = isVolt ? 1.0 : 0.95;
+      this.colArray[i * 4 + 2] = isVolt ? 0.27 : 0.72;
+      this.colArray[i * 4 + 3] = 0.55 + Math.random() * 0.4;
+
+      this.sizeArray[i] = Math.random() < 0.2 ? 0.055 : 0.035;
+    }
+
+    this.pPosBuffer = gl.createBuffer();
+    this.pColBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pColBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.colArray, gl.STATIC_DRAW);
+
+    this.pSizeBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pSizeBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.sizeArray, gl.STATIC_DRAW);
+  }
+
+  // 4x4 Perspective Matrix & Euler Rotations
+  getMatrix(rx, ry, rz, scale, camZ) {
+    const fov = 45 * Math.PI / 180;
+    const near = 0.1, far = 100.0;
+    const f = 1.0 / Math.tan(fov / 2);
+    const aspect = this.aspect;
+
+    // Perspective Projection
+    const P = [
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) / (near - far), -1,
+      0, 0, (2 * far * near) / (near - far), 0
+    ];
+
+    // Euler rotation matrices
+    const cx = Math.cos(rx), sx = Math.sin(rx);
+    const cy = Math.cos(ry), sy = Math.sin(ry);
+    const cz = Math.cos(rz), sz = Math.sin(rz);
+
+    // Compound World Rotation * Scale
+    const m00 = (cy * cz) * scale;
+    const m01 = (cy * sz) * scale;
+    const m02 = (-sy) * scale;
+
+    const m10 = (sx * sy * cz - cx * sz) * scale;
+    const m11 = (sx * sy * sz + cx * cz) * scale;
+    const m12 = (sx * cy) * scale;
+
+    const m20 = (cx * sy * cz + sx * sz) * scale;
+    const m21 = (cx * sy * sz - sx * cz) * scale;
+    const m22 = (cx * cy) * scale;
+
+    // World to View (translate by camZ)
+    const M = [
+      m00, m10, m20, 0,
+      m01, m11, m21, 0,
+      m02, m12, m22, 0,
+      0, 0, -camZ, 1
+    ];
+
+    // Multiply P * M
+    const out = new Float32Array(16);
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        let sum = 0;
+        for (let k = 0; k < 4; k++) sum += P[k * 4 + i] * M[j * 4 + k];
+        out[j * 4 + i] = sum;
+      }
+    }
+    return out;
+  }
+
+  animate() {
+    if (document.hidden) {
+      requestAnimationFrame(this.animate);
+      return;
+    }
+    const gl = this.gl;
+    this.time += 0.016;
+
+    // Inertia rotation smoothing
+    globalRotX += (targetRotX - globalRotX) * 0.05;
+    globalRotY += (targetRotY - globalRotY) * 0.05;
+
+    const objRotX = globalRotX + Math.sin(this.time * 0.35) * 0.08 + globalScrollProgress * 1.2;
+    const objRotY = globalRotY + this.time * 0.16 + globalScrollProgress * 2.8;
+    const objRotZ = Math.sin(this.time * 0.25) * 0.05;
+    const scale = 1.0 + Math.sin(globalScrollProgress * Math.PI * 3) * 0.22;
+    const camZ = (isMobile ? 8.6 : 7.2) - globalScrollProgress * 1.8;
+
+    if (globalShockwave > 0) globalShockwave = Math.max(0, globalShockwave - 0.03);
+
+    // Unproject screen mouse to camera world plane for particle repulsion
+    const ndcX = (mouseX / this.canvas.width) * 2 - 1;
+    const ndcY = -(mouseY / this.canvas.height) * 2 + 1;
+    const worldMouseX = ndcX * (camZ * Math.tan(22.5 * Math.PI / 180) * this.aspect);
+    const worldMouseY = ndcY * (camZ * Math.tan(22.5 * Math.PI / 180));
+    const repelRad = isMobile ? 1.8 : 2.8;
+    const repelRadSq = repelRad * repelRad;
+
+    // Update Particle Physics Simulation with active cursor repel
+    for (let i = 0; i < this.pCount; i++) {
+      const p = this.particles[i];
+      let tx = p.orig.x + Math.sin(this.time * 0.6 + i) * 0.04;
+      let ty = p.orig.y + Math.cos(this.time * 0.5 + i) * 0.04;
+      let tz = p.orig.z + Math.sin(this.time * 0.4 + i * 0.5) * 0.04;
+
+      if (globalShockwave > 0) {
+        tx += p.orig.x * globalShockwave * 1.8;
+        ty += p.orig.y * globalShockwave * 1.8;
+        tz += p.orig.z * globalShockwave * 1.8;
+      }
+
+      // Repel from cursor in 3D: particles actively flee away
+      const dx = p.x - worldMouseX;
+      const dy = p.y - worldMouseY;
+      const dz = p.z;
+      const distSq = dx * dx + dy * dy + dz * dz;
+      if (distSq < repelRadSq && distSq > 0.0001) {
+        const dist = Math.sqrt(distSq);
+        const pushForce = Math.pow(1 - dist / repelRad, 2) * 0.35;
+        p.vx += (dx / dist) * pushForce;
+        p.vy += (dy / dist) * pushForce;
+        p.vz += (dz / dist) * pushForce;
+      }
+
+      // Harmonic spring damping
+      p.vx += (tx - p.x) * 0.045;
+      p.vy += (ty - p.y) * 0.045;
+      p.vz += (tz - p.z) * 0.045;
+      p.vx *= 0.86; p.vy *= 0.86; p.vz *= 0.86;
+      p.x += p.vx; p.y += p.vy; p.z += p.vz;
+
+      this.posArray[i * 3] = p.x;
+      this.posArray[i * 3 + 1] = p.y;
+      this.posArray[i * 3 + 2] = p.z;
+    }
+
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    const mat = this.getMatrix(objRotX, objRotY, objRotZ, scale, camZ);
+
+    // 1. Draw 3D Particle Cloud
+    gl.useProgram(this.program);
+    gl.uniformMatrix4fv(this.uMatrix, false, mat);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pPosBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, this.posArray, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(this.aPosition);
+    gl.vertexAttribPointer(this.aPosition, 3, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pColBuffer);
+    gl.enableVertexAttribArray(this.aColor);
+    gl.vertexAttribPointer(this.aColor, 4, gl.FLOAT, false, 0, 0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.pSizeBuffer);
+    gl.enableVertexAttribArray(this.aSize);
+    gl.vertexAttribPointer(this.aSize, 1, gl.FLOAT, false, 0, 0);
+
+    gl.drawArrays(gl.POINTS, 0, this.pCount);
+
+    // 2. Draw 3D Wireframe Icosahedron Shell
+    gl.useProgram(this.lineProg);
+    gl.uniformMatrix4fv(this.uLineMat, false, mat);
+    gl.uniform4f(this.uLineColor, 0.85, 1.0, 0.27, 0.35); // Signature Volt
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.icoBuffer);
+    gl.enableVertexAttribArray(this.aLinePos);
+    gl.vertexAttribPointer(this.aLinePos, 3, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.LINES, 0, this.icoVertexCount);
+
+    // 3. Draw Gyroscopic Torus Rings
+    this.rings.forEach((ring, idx) => {
+      ring.rx += ring.sx;
+      ring.ry += ring.sy;
+      const rMat = this.getMatrix(objRotX + ring.rx, objRotY + ring.ry, objRotZ, scale, camZ);
+      gl.uniformMatrix4fv(this.uLineMat, false, rMat);
+      gl.uniform4f(this.uLineColor, idx === 0 ? 0.85 : 0.24, idx === 0 ? 1.0 : 0.95, idx === 0 ? 0.27 : 0.72, 0.45);
+
+      const rb = this.ringBuffers[idx];
+      gl.bindBuffer(gl.ARRAY_BUFFER, rb.buf);
+      gl.enableVertexAttribArray(this.aLinePos);
+      gl.vertexAttribPointer(this.aLinePos, 3, gl.FLOAT, false, 0, 0);
+      gl.drawArrays(gl.LINE_STRIP, 0, rb.count);
+    });
+
+    requestAnimationFrame(this.animate);
+  }
+}
+
+/* ================================================================
+   ENGINE B: HIGH-PERFORMANCE THREE.JS IMPLEMENTATION
+   Used when Three.js is loaded into window.THREE
+   ================================================================ */
+function startThreeJsEngine(canvas) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, isMobile ? 8.6 : 7.2);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = "srgb";
+
+  const coreGroup = new THREE.Group();
+  scene.add(coreGroup);
+
+  // Outer Geodesic Icosahedron Shell
+  const shell = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(1.65, 3),
+    new THREE.MeshBasicMaterial({ color: 0xd8ff45, wireframe: true, transparent: true, opacity: 0.35 })
+  );
+  coreGroup.add(shell);
+
+  // Pulsating Quantum Nucleus
+  const nucleus = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.72, 3),
+    new THREE.MeshBasicMaterial({ color: 0xd8ff45, wireframe: false, transparent: true, opacity: 0.85 })
+  );
+  coreGroup.add(nucleus);
+
+  const innerWire = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(0.95, 2),
+    new THREE.MeshBasicMaterial({ color: 0x3df3b8, wireframe: true, transparent: true, opacity: 0.4 })
+  );
+  coreGroup.add(innerWire);
+
+  // Orbital Torus Rings
+  const rings = [];
+  for (let i = 0; i < 4; i++) {
+    const ringGeo = new THREE.TorusGeometry(1.95 + i * 0.38, 0.014, 16, 120);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: i % 2 === 0 ? 0xd8ff45 : 0x3df3b8,
+      transparent: true, opacity: 0.45
+    });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = i * 0.6;
+    ring.rotation.y = i * 0.8;
+    coreGroup.add(ring);
+    rings.push({ mesh: ring, sx: 0.002 * (i + 1), sy: 0.003 * (i + 1), sz: 0.0015 * (i + 1) });
+  }
+
+  // 3,200 Interactive Physics Particles
+  const pCount = isMobile ? 1400 : CONFIG.animation.particlesCount;
+  const pPositions = new Float32Array(pCount * 3);
+  const pColors = new Float32Array(pCount * 3);
+  const particleData = [];
+
+  for (let i = 0; i < pCount; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const b = Math.acos(2 * Math.random() - 1);
+    const rad = 1.35 + Math.random() * 2.8;
+    const orig = new Vector3(rad * Math.sin(b) * Math.cos(a), rad * Math.sin(b) * Math.sin(a), rad * Math.cos(b));
+
+    particleData.push({ orig, x: orig.x, y: orig.y, z: orig.z, vx: 0, vy: 0, vz: 0 });
+    pPositions[i * 3] = orig.x;
+    pPositions[i * 3 + 1] = orig.y;
+    pPositions[i * 3 + 2] = orig.z;
+
+    const isVolt = Math.random() < 0.75;
+    pColors[i * 3] = isVolt ? 0.85 : 0.24;
+    pColors[i * 3 + 1] = isVolt ? 1.0 : 0.95;
+    pColors[i * 3 + 2] = isVolt ? 0.27 : 0.72;
+  }
+
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute("position", new THREE.BufferAttribute(pPositions, 3));
+  pGeo.setAttribute("color", new THREE.BufferAttribute(pColors, 3));
+
+  const pMat = new THREE.PointsMaterial({
+    size: 0.042,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.85,
+    blending: THREE.AdditiveBlending
+  });
+  const pPoints = new THREE.Points(pGeo, pMat);
+  coreGroup.add(pPoints);
+
+  const clock = new THREE.Clock();
+  function threeLoop() {
+    if (document.hidden) { requestAnimationFrame(threeLoop); return; }
+    const t = clock.getElapsedTime();
+
+    globalRotX += (targetRotX - globalRotX) * 0.05;
+    globalRotY += (targetRotY - globalRotY) * 0.05;
+
+    coreGroup.rotation.x = globalRotX + Math.sin(t * 0.35) * 0.08 + globalScrollProgress * 1.2;
+    coreGroup.rotation.y = globalRotY + t * 0.16 + globalScrollProgress * 2.8;
+    coreGroup.rotation.z = Math.sin(t * 0.25) * 0.05;
+    coreGroup.scale.setScalar(1 + Math.sin(globalScrollProgress * Math.PI * 3) * 0.22);
+
+    rings.forEach(r => { r.mesh.rotation.x += r.sx; r.mesh.rotation.y += r.sy; r.mesh.rotation.z += r.sz; });
+    nucleus.scale.setScalar(0.9 + Math.sin(t * 3.5) * 0.15);
+    innerWire.rotation.y = -t * 0.35;
+
+    camera.position.z = (isMobile ? 8.6 : 7.2) - globalScrollProgress * 1.8;
+
+    if (globalShockwave > 0) globalShockwave = Math.max(0, globalShockwave - 0.03);
+
+    // 3D Cursor raycast on Z=0 plane to repel particles
+    const raycaster = new THREE.Raycaster();
+    const mouseNDC = new THREE.Vector2(
+      (mouseX / window.innerWidth) * 2 - 1,
+      -(mouseY / window.innerHeight) * 2 + 1
+    );
+    raycaster.setFromCamera(mouseNDC, camera);
+    const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const worldHit = new THREE.Vector3();
+    raycaster.ray.intersectPlane(planeZ, worldHit);
+    const invCore = new THREE.Matrix4().copy(coreGroup.matrixWorld).invert();
+    const localCursor = worldHit.clone().applyMatrix4(invCore);
+    const repelRadius = isMobile ? 2.0 : 3.0;
+    const repelRadiusSq = repelRadius * repelRadius;
+
+    // Particle Physics with active cursor repel
+    const pos = pGeo.attributes.position.array;
+    for (let i = 0; i < pCount; i++) {
+      const p = particleData[i];
+      let tx = p.orig.x + Math.sin(t * 0.6 + i) * 0.04;
+      let ty = p.orig.y + Math.cos(t * 0.5 + i) * 0.04;
+      let tz = p.orig.z + Math.sin(t * 0.4 + i * 0.5) * 0.04;
+
+      if (globalShockwave > 0) {
+        tx += p.orig.x * globalShockwave * 1.8;
+        ty += p.orig.y * globalShockwave * 1.8;
+        tz += p.orig.z * globalShockwave * 1.8;
+      }
+
+      // Repel from cursor: particles actively move away from cursor position
+      const dx = p.x - localCursor.x;
+      const dy = p.y - localCursor.y;
+      const dz = p.z - localCursor.z;
+      const distSq = dx * dx + dy * dy + dz * dz;
+
+      if (distSq < repelRadiusSq && distSq > 0.0001) {
+        const dist = Math.sqrt(distSq);
+        const pushForce = Math.pow(1 - dist / repelRadius, 2) * 0.36;
+        p.vx += (dx / dist) * pushForce;
+        p.vy += (dy / dist) * pushForce;
+        p.vz += (dz / dist) * pushForce;
+      }
+
+      p.vx += (tx - p.x) * 0.045;
+      p.vy += (ty - p.y) * 0.045;
+      p.vz += (tz - p.z) * 0.045;
+      p.vx *= 0.86; p.vy *= 0.86; p.vz *= 0.86;
+      p.x += p.vx; p.y += p.vy; p.z += p.vz;
+
+      pos[i * 3] = p.x;
+      pos[i * 3 + 1] = p.y;
+      pos[i * 3 + 2] = p.z;
+    }
+    pGeo.attributes.position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+    requestAnimationFrame(threeLoop);
+  }
+  requestAnimationFrame(threeLoop);
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// Master Stage 3D Bootloader
+let stage3dInitialized = false;
+function bootStage3D() {
+  if (stage3dInitialized) return;
+  const canvas = $("#stage3dCanvas");
+  if (!canvas) return;
+
+  if (typeof THREE !== "undefined") {
+    try {
+      startThreeJsEngine(canvas);
+      stage3dInitialized = true;
+      return;
+    } catch (e) {
+      console.warn("Three.js engine notice, starting standalone hardware WebGL engine:", e);
+    }
+  }
+
+  // Standalone Hardware WebGL GLSL Shader Engine (100% Guaranteed to run!)
+  try {
+    const freshCanvas = canvas.cloneNode(false);
+    canvas.replaceWith(freshCanvas);
+    new StandaloneWebGL3DEngine(freshCanvas);
+    stage3dInitialized = true;
+  } catch (err) {
+    console.warn("WebGL fallback warning:", err);
+  }
+}
+
+/* ================================================================
+   3D PRELOADER: 3D PARTICLE ASSEMBLY + 2.0S CURTAIN-SPLIT REVEAL
+   Strict 2.0s duration + 2.5s hard safety net
+   ================================================================ */
+function runCurtainPreloader() {
+  const loader = $("#loader");
+  const loaderCanvas = $("#loaderCanvas");
+  const curtainLeft = $("#curtainLeft");
+  const curtainRight = $("#curtainRight");
+  const loaderStage = $("#loaderStage");
+  const loaderNum = $("#loaderNum");
+  const loaderProgressBar = $("#loaderProgressBar");
+
+  const lCtx = loaderCanvas.getContext("2d");
+  let lw = (loaderCanvas.width = window.innerWidth);
+  let lh = (loaderCanvas.height = window.innerHeight);
+
+  window.addEventListener("resize", () => {
+    lw = loaderCanvas.width = window.innerWidth;
+    lh = loaderCanvas.height = window.innerHeight;
+  }, { passive: true });
+
+  const pCount = 950;
+  const particles = [];
+  for (let i = 0; i < pCount; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const b = Math.acos(2 * Math.random() - 1);
+    const r = 1.35 + (Math.random() < 0.25 ? 0.35 : 0);
+    const target = new Vector3(r * Math.sin(b) * Math.cos(a), r * Math.sin(b) * Math.sin(a), r * Math.cos(b));
+    const start = new Vector3((Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14, (Math.random() - 0.5) * 14);
+    particles.push({ target, start, size: 1.5 + Math.random() * 1.5 });
+  }
+
+  let assemblyFactor = 0;
+  let t = 0;
+
+  function renderLoader3D() {
+    if (!document.body.classList.contains("loading")) return;
+    t += 0.025;
+    lCtx.clearRect(0, 0, lw, lh);
+
+    const eased = assemblyFactor * assemblyFactor * (3 - 2 * assemblyFactor);
+    const fov = 650;
+    const camZ = 5.8;
+
+    lCtx.fillStyle = "rgba(216, 255, 69, 0.95)";
+    particles.forEach(p => {
+      const curX = p.start.x + (p.target.x - p.start.x) * eased;
+      const curY = p.start.y + (p.target.y - p.start.y) * eased;
+      const curZ = p.start.z + (p.target.z - p.start.z) * eased;
+
+      const rotY = t * 0.7;
+      const rotX = t * 0.4;
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const x1 = curX * cosY + curZ * sinY;
+      const z1 = -curX * sinY + curZ * cosY;
+
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const y2 = curY * cosX - z1 * sinX;
+      const z2 = curY * sinX + z1 * cosX;
+
+      const depth = camZ + z2;
+      if (depth > 0.5) {
+        const pFactor = fov / depth;
+        const sx = lw / 2 + x1 * pFactor;
+        const sy = lh / 2 + y2 * pFactor;
+        lCtx.beginPath();
+        lCtx.arc(sx, sy, Math.max(0.8, p.size * (pFactor / 100)), 0, Math.PI * 2);
+        lCtx.fill();
+      }
+    });
+
+    requestAnimationFrame(renderLoader3D);
+  }
+  requestAnimationFrame(renderLoader3D);
+
+  // Letter reveal
+  if (typeof gsap !== "undefined" && !isReduced) {
+    gsap.to(".loaderLetter", { y: "0%", stagger: 0.07, duration: 0.7, ease: "power4.out", delay: 0.1 });
+  }
+
+  // Strict 2.0-second assembly timeline
+  const startTime = performance.now();
+  const duration = CONFIG.animation.loaderDuration * 1000;
+  let dismissed = false;
+
+  const timer = setInterval(() => {
+    const elapsed = performance.now() - startTime;
+    const progress = Math.min(100, (elapsed / duration) * 100);
+
+    const num = Math.floor(progress);
+    loaderNum.textContent = String(num).padStart(3, "0");
+    loaderProgressBar.style.width = `${num}%`;
+    assemblyFactor = progress / 100;
+
+    if (progress >= 100) {
+      clearInterval(timer);
+      executeCurtainSplit();
+    }
+  }, 16);
+
+  function executeCurtainSplit() {
+    if (dismissed) return;
+    dismissed = true;
+    if (window.__splitCurtains) {
+      window.__splitCurtains();
+    }
+    initScrollAndMotion();
+  }
+
+  // Hard safety timeout at 2.5 seconds (CRITICAL REQUIREMENT)
+  setTimeout(() => {
+    if (document.body.classList.contains("loading")) {
+      clearInterval(timer);
+      executeCurtainSplit();
+    }
+  }, CONFIG.animation.loaderFailSafe * 1000);
+}
+
+/* ================================================================
+   SMOOTH SCROLL (LENIS) & GSAP SCROLLTRIGGER ANIMATIONS
+   ================================================================ */
+let lenis = null;
+function initScrollAndMotion() {
+  window.__initMotion = initScrollAndMotion;
+  if (typeof Lenis !== "undefined" && !isReduced) {
+    try {
+      lenis = new Lenis({
+        duration: 1.25,
+        easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: "vertical",
+        gestureOrientation: "vertical",
+        smoothWheel: true,
+        wheelMultiplier: 1,
+        touchMultiplier: 1.8
+      });
+
+      if (typeof ScrollTrigger !== "undefined" && typeof gsap !== "undefined") {
+        lenis.on("scroll", ScrollTrigger.update);
+        lenis.on("scroll", updateNavVisibility);
+        gsap.ticker.add(time => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+    } catch (e) {
+      console.warn("Lenis init note:", e);
+    }
+  }
+
+  // Anchor navigation
+  $$("a[href^='#']").forEach(a => {
+    a.addEventListener("click", e => {
+      const hash = a.getAttribute("href");
+      if (!hash || hash === "#") return;
+      const target = $(hash);
+      if (target) {
+        e.preventDefault();
+        if (lenis) lenis.scrollTo(target, { offset: -20 });
+        else target.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  });
+
+  if (typeof gsap === "undefined") return;
+  if (typeof ScrollTrigger !== "undefined") gsap.registerPlugin(ScrollTrigger);
+
+  if (isReduced) {
+    $$(".heroChar, .aboutCard, .projectRow, .expCard").forEach(el => {
+      el.style.opacity = "1";
+      el.style.transform = "none";
+    });
+    return;
+  }
+
+  // Hero Characters Stagger Reveal
+  gsap.timeline({ delay: 0.1 })
+    .to(".heroChar", { y: "0%", stagger: 0.035, duration: 1.2, ease: "power4.out" })
+    .from(".heroStatement", { y: 25, opacity: 0, duration: 0.85, ease: "power3.out" }, "-=0.6");
+
+  // Scroll Animations
+  if (typeof ScrollTrigger !== "undefined") {
+    gsap.to(".heroContent", {
+      yPercent: -20, opacity: 0.08,
+      scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 1 }
+    });
+
+    gsap.fromTo(".manifestoText .muted",
+      { color: "rgba(99, 97, 91, 0.4)" },
+      { color: "#f5f3ec", duration: 1.5, scrollTrigger: { trigger: ".manifesto", start: "top 65%", end: "center 35%", scrub: 1 } }
+    );
+
+    const cards = $$(".aboutCard");
+    gsap.timeline({ scrollTrigger: { trigger: ".about", start: "top top", end: "bottom bottom", scrub: 1.2 } })
+      .to(cards, { opacity: 1, y: 0, stagger: 0.12, duration: 1 })
+      .to(cards[0], { x: "-6vw", y: "-8vh", rotate: -4, duration: 1 }, "<")
+      .to(cards[1], { x: "6vw", y: "-6vh", rotate: 4, duration: 1 }, "<")
+      .to(cards[2], { x: "-5vw", y: "7vh", rotate: 3, duration: 1 }, "<")
+      .to(cards[3], { x: "6vw", y: "8vh", rotate: -3, duration: 1 }, "<")
+      .to(".aboutCenter", { scale: 0.75, opacity: 0.3, duration: 1 })
+      .to(cards, { opacity: 0.15, scale: 0.85, duration: 1 })
+      .to(".aboutCenter", { scale: 1.8, opacity: 0, duration: 1 }, "<");
+
+    $$(".projectRow").forEach(row => {
+      gsap.from(row, {
+        y: 45, opacity: 0, duration: 0.8,
+        scrollTrigger: { trigger: row, start: "top 88%", end: "top 65%", scrub: 0.8 }
+      });
+    });
+
+    gsap.timeline({ scrollTrigger: { trigger: ".experiments", start: "top top", end: "bottom bottom", scrub: 1.2 } })
+      .to(".expCard:nth-child(1)", { x: "-32vw", y: "-6vh", rotation: -12, duration: 1 })
+      .to(".expCard:nth-child(2)", { x: 0, y: "-2vh", rotation: 0, duration: 1 }, "<")
+      .to(".expCard:nth-child(3)", { x: "32vw", y: "6vh", rotation: 12, duration: 1 }, "<")
+      .to(".expCard", { scale: 0.82, duration: 1 })
+      .to(".expCard:nth-child(1)", { x: "-42vw", rotationY: -28, duration: 1 }, "<")
+      .to(".expCard:nth-child(2)", { z: 120, duration: 1 }, "<")
+      .to(".expCard:nth-child(3)", { x: "42vw", rotationY: 28, duration: 1 }, "<");
+
+    gsap.from(".humanTitle span", {
+      yPercent: 100, opacity: 0, stagger: 0.12,
+      scrollTrigger: { trigger: ".human", start: "top 75%", end: "center center", scrub: 1 }
+    });
+
+    gsap.to("#scrollProgress", {
+      height: "100%", ease: "none",
+      scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: 0.15 }
+    });
+
+    ScrollTrigger.refresh();
+  }
+}
+
+/* ================================================================
+   NAVIGATION MENU OVERLAY TOGGLE
+   ================================================================ */
+const menuOverlay = $("#menuOverlay");
+const menuToggle = $("#menuToggle");
+const menuClose = $("#menuClose");
+
+function toggleMenu(open) {
+  if (open) {
+    menuOverlay.classList.add("open");
+    if (typeof gsap !== "undefined") {
+      gsap.to(menuOverlay, { y: "0%", duration: 0.85, ease: "power4.inOut" });
+      gsap.from(".menuNavLink", { y: 60, opacity: 0, stagger: 0.08, duration: 0.7, delay: 0.2, ease: "power3.out" });
+    } else {
+      menuOverlay.style.transform = "translateY(0%)";
+    }
+  } else {
+    if (typeof gsap !== "undefined") {
+      gsap.to(menuOverlay, {
+        y: "-101%", duration: 0.75, ease: "power4.inOut",
+        onComplete: () => menuOverlay.classList.remove("open")
+      });
+    } else {
+      menuOverlay.style.transform = "translateY(-101%)";
+      menuOverlay.classList.remove("open");
+    }
+  }
+}
+
+menuToggle.addEventListener("click", () => toggleMenu(true));
+menuClose.addEventListener("click", () => toggleMenu(false));
+$$(".menuNavLink").forEach(l => l.addEventListener("click", () => toggleMenu(false)));
+
+/* ================================================================
+   INITIALIZATION
+   ================================================================ */
+bootStage3D();
+runCurtainPreloader();
+
+/* Easter egg: Type "compile" */
+let typed = "";
+window.addEventListener("keydown", e => {
+  typed = (typed + e.key.toLowerCase()).slice(-15);
+  if (typed.includes("compile") && typeof gsap !== "undefined") {
+    typed = "";
+    gsap.to(".projectRow, .expCard", {
+      rotation: () => (Math.random() - 0.5) * 16,
+      x: () => (Math.random() - 0.5) * 40,
+      duration: 0.6,
+      stagger: 0.02,
+      onComplete: () => {
+        gsap.to(".projectRow, .expCard", { rotation: 0, x: 0, duration: 0.8, ease: "elastic.out(1, 0.45)" });
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>
